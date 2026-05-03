@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"maxLength": 100
+		},
+		"type": {
+			"type": "string",
+			"maxLength": 25
+		},
+		"description": {
+			"type": "string",
+			"maxLength": 2000
+		},
+		"stock": {
+			"type": "number",
+			"minimum": 0
+		},
+		"price": {
+			"type": "number",
+			"minimum": 0
+		}
+	},
+	"required": ["name", "type", "description", "stock", "price"],
+	"additionalProperties": false
+}

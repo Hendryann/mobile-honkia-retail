@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"lib": ["esnext"],
+		"module": "esnext",
+		"target": "esnext",
+		"moduleResolution": "node",
+
+		"strict": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true
+	},
+	"include": ["src"]
+}
