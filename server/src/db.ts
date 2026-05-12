@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise'
+import { hashPassword } from './auth'
 const { db_host, db_port, db_user, db_password, db_database, dev } = process.env
 
 const db = await mysql.createConnection({
@@ -31,19 +32,7 @@ await Promise.all([
 	isadmin boolean default false,
 	password binary(50) invisible
 )`,
-`create table if not exists auths(
-	authkey char(20) invisible primary key,
-	lastused date default (utc_date()),
-	id char(12),
 
-	foreign key (id) references users(id) on delete cascade on update cascade
-)`,
-`create event if not exists delete_old_auths
-	on schedule every 1 day
-	do
-		delete from auths
-		where lastused < date_sub(utc_date(), interval 1 day)
-`
 ].map(q => db.query(q)))
 
 if (dev) {
@@ -58,13 +47,10 @@ if (dev) {
 	db.query(`insert into items(id, name, type, description, stock, price, image) values ` + map(items), items.flat()).catch(console.error)
 
 	const users = [
-		[ "0", "admin", true ],
-		[ "1", "user" , false ],
+		[ "0", "admin", true, process.env.admin_password ? hashPassword('admin', process.env.admin_password) : null ],
+		[ "1", "user" , false, 'user' ],
 	]
-	db.query(`insert into users(id, name, isadmin) values` + map(users), users.flat()).catch(console.error)
-
-	if (process.env.admin_auth) db.query(`insert into auths(authkey, id) values(?, "0")`, [process.env.admin_auth]).catch(console.error)
-	if (process.env.user_auth) db.query(`insert into auths(authkey, id) values(?, "1")`, [process.env.user_auth]).catch(console.error)
+	db.query(`insert into users(id, name, isadmin, password) values` + map(users), users.flat()).catch(console.error)
 }
 
 export type * from 'mysql2/promise'

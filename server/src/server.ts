@@ -1,7 +1,7 @@
 import express from 'express'
 import http from 'http'
-import db from './db'
 import jsonschema from 'jsonschema'
+import jwt from 'jsonwebtoken'
 
 export const app = express()
 export const server = http.createServer(app)
@@ -18,30 +18,27 @@ export function promisifyHandler<T extends express.Handler>(fn: T): express.Hand
 	}
 }
 
-const authUpdateIngnore = new Set<string>()
-const authUpdateInterval = setInterval(() => authUpdateIngnore.clear(), 60000)
-server.once('beforeclose', () => {
-	console.log('authignore interval cleared')
-	clearInterval(authUpdateInterval)
-})
+export interface GetAuthRet {
+	err?: string
+	errcode?: number
+	info?: UserInfo
+}
 
-export async function getAuth(auth?: string): Promise<{err?: string, errcode?: number, info?: UserInfo}> {
+export async function getAuth(auth?: string): Promise<GetAuthRet> {
 	if (!auth)
 		return { err: 'Authorization required\n', errcode: 401 }
 	if (!auth.startsWith('Bearer '))
 		return { err: 'Only Bearer authorization is supported\n', errcode: 400 }
 
-	const key = auth.slice(7)
-	const [[info]] = await db.execute('select * from users where id = (select id from auths where authkey = ?)', [key]) as any
-	if (!info)
+	const token = auth.slice(7)
+	let payload: any
+	try {
+		payload = jwt.verify(token, process.env.jwt_secret!)
+	} catch(e) {
 		return { err: 'Failed to authorize\n', errcode: 401 }
-
-	if (!authUpdateIngnore.has(auth)) {
-		authUpdateIngnore.add(auth)
-		db.execute('update auths set lastused = utc_date() where authkey = ?', [key]).catch(console.error)
 	}
 
-	return {info: info}
+	return { info: payload }
 }
 
 export const needAuth = promisifyHandler(async (req, res, next) => {
