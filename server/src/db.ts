@@ -29,7 +29,7 @@ await Promise.all([
 `create table if not exists users(
 	name varchar(100) primary key,
 	isadmin boolean default false,
-	password binary(50) invisible
+	password binary(32) invisible
 )`,
 
 ].map(q => db.query(q)))
