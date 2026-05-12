@@ -27,8 +27,7 @@ await Promise.all([
 	constraint image check (length(image) <= 5242880)
 )`,
 `create table if not exists users(
-	id char(12) primary key,
-	name varchar(100) not null,
+	name varchar(100) primary key,
 	isadmin boolean default false,
 	password binary(50) invisible
 )`,
@@ -47,10 +46,10 @@ if (dev) {
 	db.query(`insert into items(id, name, type, description, stock, price, image) values ` + map(items), items.flat()).catch(console.error)
 
 	const users = [
-		[ "0", "admin", true, process.env.admin_password ? hashPassword('admin', process.env.admin_password) : null ],
-		[ "1", "user" , false, 'user' ],
+		[ "admin", true, process.env.admin_password ? hashPassword('admin', process.env.admin_password) : null ],
+		[ "user" , false, 'user' ],
 	]
-	db.query(`insert into users(id, name, isadmin, password) values` + map(users), users.flat()).catch(console.error)
+	db.query(`insert into users(name, isadmin, password) values` + map(users), users.flat()).catch(console.error)
 }
 
 export type * from 'mysql2/promise'
