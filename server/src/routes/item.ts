@@ -5,7 +5,7 @@ import crypto from 'crypto'
 
 server.app.get('/items',
 	server.promisifyHandler(async (req, res) => {
-		const [items] = await db.execute('select * from items where') as any
+		const [items] = await db.execute('select * from items') as any
 		res.json(items).end()
 	})
 )
