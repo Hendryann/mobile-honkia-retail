@@ -1,0 +1,15 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"username": {
+			"type": "string",
+			"maxLength": 100
+		},
+		"password": {
+			"type": "string"
+		}
+	},
+	"required": ["username", "password"],
+	"additionalProperties": false
+}
