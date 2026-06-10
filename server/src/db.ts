@@ -23,6 +23,7 @@ await Promise.all([
 	stock int unsigned not null,
 	price int unsigned not null,
 	image mediumblob invisible,
+  created_at timestamp default current_timestamp,
 
 	constraint image check (length(image) <= 5242880)
 )`,

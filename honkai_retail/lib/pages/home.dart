@@ -28,14 +28,15 @@ class _HomeState extends State<Home> {
       ApiService.get('/items'),
     ]);
 
-    if (!mounted) return;
-
     setState(() {
       if (results[0].statusCode == 200) {
         _userInfo = jsonDecode(results[0].body);
       }
       if (results[1].statusCode == 200) {
-        _items = List<Map<String, dynamic>>.from(jsonDecode(results[1].body));
+        _items = List<Map<String, dynamic>>.from(
+          jsonDecode(results[1].body),
+        ).take(6).toList();
+        if (!mounted) return;
       }
       _loading = false;
     });
@@ -45,6 +46,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return BackgroundScaffold(
       actions: [
+        IconButton(icon: const Icon(Icons.search), onPressed: () {}),
         IconButton(
           icon: const Icon(Icons.shopping_cart_outlined),
           onPressed: () {},
@@ -56,34 +58,6 @@ class _HomeState extends State<Home> {
               onRefresh: _load,
               child: CustomScrollView(
                 slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      bottom: 8,
-                      left: 12,
-                      right: 12,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search resources or light cones...',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.grey,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                   SliverToBoxAdapter(
                     child: _WelcomeBanner(name: _userInfo?['name'] ?? ''),
                   ),
