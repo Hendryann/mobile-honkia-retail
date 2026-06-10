@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:honkai_retail/core/services/api_service.dart';
+import 'package:http/http.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,15 +28,13 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final res = await http.post(
-        Uri.parse('${dotenv.env['API_URL']}/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final res = await ApiService.post(
+        '/login',
+        body: {
           'username': _usernameController.text,
           'password': _passwordController.text,
-        }),
+        },
       );
-
       if (!mounted) return;
 
       if (res.statusCode == 200) {
@@ -70,10 +69,9 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      final res = await http.post(
-        Uri.parse('${dotenv.env['API_URL']}/google-login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'idToken': idToken}),
+      final res = await ApiService.post(
+        '/google-login',
+        body: {'idToken': idToken},
       );
 
       if (!mounted) return;
