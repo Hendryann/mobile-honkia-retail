@@ -5,7 +5,10 @@ await esbuild.build({
 	entryPoints: ['src/**/*'],
 	outdir: 'dist',
 	packages: 'external',
-	format: 'esm'
+	format: 'esm',
+	loader: {
+		'.json': 'copy'
+	}
 })
 
 await replaceTscAliasPaths({

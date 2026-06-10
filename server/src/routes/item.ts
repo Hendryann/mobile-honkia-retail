@@ -43,7 +43,7 @@ server.app.get('/item/:id/image',
 server.app.post('/item/:id/purchase',
 	server.needAuth,
 	express.json({ limit: '3kb', type: () => true }),
-	server.jsonSchemaValidate(await import('../schema/purchase.json')),
+	server.jsonSchemaValidate(await import('../schema/purchase.json', { with: { type: 'json' }})),
 	server.promisifyHandler(async (req, res) => {
 		const {amount = 1} = req.body
 
@@ -59,7 +59,7 @@ server.app.post('/item/:id/purchase',
 server.app.post('/item/new',
 	server.needAdmin,
 	express.json({ limit: '3kb', type: () => true }),
-	server.jsonSchemaValidate(await import('../schema/item.json')),
+	server.jsonSchemaValidate(await import('../schema/item.json', { with: { type: 'json' }})),
 	server.promisifyHandler(async (req, res) => {
 		const b = req.body
 		const id = crypto.randomBytes(9).toString('base64url').slice(0, 12)
@@ -87,7 +87,7 @@ server.app.put('/item/:id/image',
 server.app.patch('/item/:id',
 	server.needAdmin,
 	express.json({ limit: '3kb', type: () => true }),
-	server.jsonSchemaValidate(await import('../schema/item.json')),
+	server.jsonSchemaValidate(await import('../schema/item.json', { with: { type: 'json' }})),
 	server.promisifyHandler(async (req, res) => {
 		const b = req.body
 		const [qres] = await db.execute(

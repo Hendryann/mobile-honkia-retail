@@ -15,7 +15,7 @@ server.app.get('/userinfo',
 
 server.app.post('/login',
 	express.json({ limit: '3kb', type: () => true }),
-	server.jsonSchemaValidate(await import('../schema/login.json')),
+	server.jsonSchemaValidate(await import('../schema/login.json', { with: { type: 'json' } })),
 	server.promisifyHandler(async (req, res) => {
 		const [[user]] = await db.execute('select name, isadmin from users where name = ? and password = ?', [req.body.username, hashPassword(req.body.username, req.body.password)]) as any
 		if (!user) return res.status(401).end()
@@ -27,7 +27,7 @@ server.app.post('/login',
 
 server.app.post('/register',
 	express.json({ limit: '3kb', type: () => true }),
-	server.jsonSchemaValidate(await import('../schema/login.json')),
+	server.jsonSchemaValidate(await import('../schema/login.json', { with: { type: 'json' } })),
 	server.promisifyHandler(async (req, res) => {
 		const [[exists]] = await db.execute('select name from users where name = ?', [req.body.username]) as any
 		if (exists) return res.status(400).send('User already exist').end()
