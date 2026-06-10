@@ -13,10 +13,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Map<String, dynamic>? _userInfo;
   bool _loading = true;
-  List<Map<String, dynamic>> _allItems = [];
   List<Map<String, dynamic>> _items = [];
-  List<String> get _types =>
-      _allItems.map((i) => i['type'] as String).toSet().toList();
+  List<String> _types = [];
   String? _selectedType;
 
   @override
@@ -25,29 +23,35 @@ class _HomeState extends State<Home> {
     _load();
   }
 
-  void _applyFilter() {
-    setState(() {
-      final filtered = _selectedType == null
-          ? _allItems
-          : _allItems.where((i) => i['type'] == _selectedType).toList();
-      _items = filtered.take(4).toList();
-    });
+  Future<void> _fetchItems() async {
+    final url = _selectedType == null
+        ? '/items?limit=4'
+        : '/items?limit=4&category=$_selectedType';
+    final res = await ApiService.get(url);
+    if (res.statusCode == 200) {
+      setState(() {
+        _items = List<Map<String, dynamic>>.from(jsonDecode(res.body));
+      });
+    }
   }
 
   Future<void> _load() async {
-    final results = await Future.wait([
-      ApiService.get('/userinfo', auth: true),
-      ApiService.get('/items'),
-    ]);
+    setState(() => _loading = true);
+
+    final userRes = ApiService.get('/userinfo', auth: true);
+    final typesRes = ApiService.get('/item/types');
+    final itemsRes = ApiService.get('/items?limit=4');
+
+    final (user, types, items) = await (userRes, typesRes, itemsRes).wait;
+
+    if (!mounted) return;
     setState(() {
-      if (results[0].statusCode == 200) {
-        _userInfo = jsonDecode(results[0].body);
+      if (user.statusCode == 200) _userInfo = jsonDecode(user.body);
+      if (types.statusCode == 200) {
+        _types = List<String>.from(jsonDecode(types.body));
       }
-      if (results[1].statusCode == 200) {
-        _allItems = List<Map<String, dynamic>>.from(
-          jsonDecode(results[1].body),
-        );
-        _applyFilter();
+      if (items.statusCode == 200) {
+        _items = List<Map<String, dynamic>>.from(jsonDecode(items.body));
       }
       _loading = false;
     });
@@ -109,10 +113,10 @@ class _HomeState extends State<Home> {
                                       leading: Radio<String?>(
                                         value: null,
                                         groupValue: _selectedType,
-                                        onChanged: (v) {
+                                        onChanged: (v) async {
                                           setState(() => _selectedType = v);
-                                          _applyFilter();
                                           Navigator.pop(context);
+                                          await _fetchItems();
                                         },
                                       ),
                                     ),
@@ -125,10 +129,10 @@ class _HomeState extends State<Home> {
                                         leading: Radio<String?>(
                                           value: type,
                                           groupValue: _selectedType,
-                                          onChanged: (v) {
+                                          onChanged: (v) async {
                                             setState(() => _selectedType = v);
-                                            _applyFilter();
                                             Navigator.pop(context);
+                                            await _fetchItems();
                                           },
                                         ),
                                       ),

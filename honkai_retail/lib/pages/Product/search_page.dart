@@ -33,17 +33,22 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _load() async {
-    final res = await ApiService.get('/items');
+    final typesRes = ApiService.get('/item/types');
+    final itemsRes = ApiService.get('/items');
+
+    final (types, items) = await (typesRes, itemsRes).wait;
+
     if (!mounted) return;
-    if (res.statusCode == 200) {
-      final items = List<Map<String, dynamic>>.from(jsonDecode(res.body));
-      setState(() {
-        _allItems = items;
-        _types = items.map((i) => i['type'] as String).toSet().toList();
-        _loading = false;
-      });
-      _applyFilter();
-    }
+    setState(() {
+      if (types.statusCode == 200) {
+        _types = List<String>.from(jsonDecode(types.body));
+      }
+      if (items.statusCode == 200) {
+        _allItems = List<Map<String, dynamic>>.from(jsonDecode(items.body));
+      }
+      _loading = false;
+    });
+    _applyFilter();
   }
 
   void _applyFilter() {
