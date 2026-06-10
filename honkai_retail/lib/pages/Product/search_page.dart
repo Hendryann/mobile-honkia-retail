@@ -103,7 +103,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
-          // Type tabs
           if (!_loading)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -131,7 +130,6 @@ class _SearchPageState extends State<SearchPage> {
                 ],
               ),
             ),
-          // Results
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
