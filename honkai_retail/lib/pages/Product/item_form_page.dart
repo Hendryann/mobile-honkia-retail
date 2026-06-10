@@ -87,14 +87,17 @@ class _ItemFormPageState extends State<ItemFormPage> {
   String? _validate() {
     if (_nameController.text.isEmpty) return 'Name cannot be empty';
     if (_typeController.text.isEmpty) return 'Type cannot be empty';
-    if (_descriptionController.text.isEmpty)
+    if (_descriptionController.text.isEmpty) {
       return 'Description cannot be empty';
+    }
     final stock = int.tryParse(_stockController.text);
-    if (stock == null || stock < 0)
+    if (stock == null || stock < 0) {
       return 'Stock must be a valid positive number';
+    }
     final price = int.tryParse(_priceController.text);
-    if (price == null || price <= 0)
+    if (price == null || price <= 0) {
       return 'Price must be a valid positive number';
+    }
     return null;
   }
 
@@ -113,7 +116,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
     try {
       final body = {
         'name': _nameController.text,
-        'type': _typeController.text,
+        'type': _typeController.text.toLowerCase(),
         'description': _descriptionController.text,
         'stock': int.parse(_stockController.text),
         'price': int.parse(_priceController.text),
