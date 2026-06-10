@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import '../services/api_service.dart';
+import 'package:honkai_retail/core/services/api_service.dart';
 
 class ItemCard extends StatefulWidget {
   const ItemCard({super.key, required this.item, this.onTap});
@@ -32,17 +32,19 @@ class _ItemCardState extends State<ItemCard> {
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
-    final inStock = (item['stock'] as int) > 0;
+    final cardColor = Theme.of(context).cardColor;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -66,11 +68,11 @@ class _ItemCardState extends State<ItemCard> {
                     }
                     if (snapshot.data == null) {
                       return Container(
-                        color: Colors.grey.shade100,
-                        child: const Center(
+                        color: onSurface.withAlpha(13),
+                        child: Center(
                           child: Icon(
                             Icons.image_not_supported,
-                            color: Colors.grey,
+                            color: onSurface.withAlpha(77),
                           ),
                         ),
                       );
@@ -97,7 +99,7 @@ class _ItemCardState extends State<ItemCard> {
                             item['type'].toString().substring(1),
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade500,
+                          color: onSurface.withAlpha(128),
                         ),
                       ),
                       Text(
@@ -113,9 +115,10 @@ class _ItemCardState extends State<ItemCard> {
                   const SizedBox(height: 2),
                   Text(
                     item['name'] ?? '',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
+                      color: onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -125,7 +128,7 @@ class _ItemCardState extends State<ItemCard> {
                     '\$${item['price']}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade700,
+                      color: primary,
                       fontSize: 15,
                     ),
                   ),

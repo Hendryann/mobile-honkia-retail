@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:honkai_retail/core/services/api_service.dart';
-import 'package:http/http.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +24,6 @@ class _LoginPageState extends State<LoginPage> {
       _loading = true;
       _error = null;
     });
-
     try {
       final res = await ApiService.post(
         '/login',
@@ -36,7 +33,6 @@ class _LoginPageState extends State<LoginPage> {
         },
       );
       if (!mounted) return;
-
       if (res.statusCode == 200) {
         final token = jsonDecode(res.body)['token'];
         await _storage.write(key: 'jwt', value: token);
@@ -63,19 +59,15 @@ class _LoginPageState extends State<LoginPage> {
       final user = await GoogleSignIn.instance.authenticate();
       final auth = user.authentication;
       final idToken = auth.idToken;
-
       if (idToken == null) {
         setState(() => _error = 'Google sign-in failed');
         return;
       }
-
       final res = await ApiService.post(
         '/google-login',
         body: {'idToken': idToken},
       );
-
       if (!mounted) return;
-
       if (res.statusCode == 200) {
         final token = jsonDecode(res.body)['token'];
         await _storage.write(key: 'jwt', value: token);
@@ -100,8 +92,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final cardColor = Theme.of(context).cardColor;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4FF),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -111,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade700,
+                  color: primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -126,19 +121,19 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade700,
+                  color: primary,
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Welcome back to effortless shopping',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: onSurface.withAlpha(153)),
               ),
               const SizedBox(height: 32),
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -151,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Email Address'),
+                    Text('Email Address', style: TextStyle(color: onSurface)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _usernameController,
@@ -161,19 +156,13 @@ class _LoginPageState extends State<LoginPage> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: Colors.grey.shade300,
+                            color: onSurface.withAlpha(51),
                             width: 1.5,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade700,
-                            width: 1.5,
-                          ),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: primary, width: 1.5),
                         ),
                       ),
                     ),
@@ -181,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Password'),
+                        Text('Password', style: TextStyle(color: onSurface)),
                         TextButton(
                           onPressed: () {},
                           child: const Text('Forgot?'),
@@ -207,20 +196,13 @@ class _LoginPageState extends State<LoginPage> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: Colors.grey.shade300,
+                            color: onSurface.withAlpha(51),
                             width: 1.5,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade700,
-                            width: 1.5,
-                          ),
-                        ),
-
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: primary, width: 1.5),
                         ),
                       ),
                     ),
@@ -248,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                             : const Icon(Icons.arrow_forward),
                         label: const Text('Sign In'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade700,
+                          backgroundColor: primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -265,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             'or continue with',
-                            style: TextStyle(color: Colors.grey.shade500),
+                            style: TextStyle(color: onSurface.withAlpha(128)),
                           ),
                         ),
                         const Expanded(child: Divider()),
@@ -297,13 +279,16 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? "),
+                  Text(
+                    "Don't have an account? ",
+                    style: TextStyle(color: onSurface),
+                  ),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/register'),
                     child: Text(
                       'Sign Up',
                       style: TextStyle(
-                        color: Colors.blue.shade700,
+                        color: primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -317,3 +302,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
