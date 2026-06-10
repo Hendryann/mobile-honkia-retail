@@ -210,11 +210,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   item['id'] as String,
                                   quantity: _quantity,
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Added to Cart'),
-                                  ),
-                                );
+                                ScaffoldMessenger.of(context)
+                                  ..clearSnackBars()
+                                  ..showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Added to Cart'),
+                                    ),
+                                  );
                               }
                             : null,
                         style: ElevatedButton.styleFrom(
