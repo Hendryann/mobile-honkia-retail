@@ -4,6 +4,7 @@ import 'package:honkai_retail/pages/Main/main_layout.dart';
 import 'package:honkai_retail/pages/Main/profile_page.dart';
 import 'package:honkai_retail/pages/Product/cart_page.dart';
 import 'package:honkai_retail/pages/Product/product_detail_page.dart';
+import 'package:honkai_retail/pages/Product/search_page.dart';
 import 'package:honkai_retail/pages/login_page.dart';
 
 class AppRoutes {
@@ -18,5 +19,6 @@ class AppRoutes {
       return ProductDetailPage(item: item);
     },
     '/cart': (context) => const CartPage(),
+    '/search': (context) => const SearchPage(),
   };
 }

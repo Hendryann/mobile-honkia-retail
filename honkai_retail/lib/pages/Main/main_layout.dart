@@ -27,6 +27,10 @@ class _MainLayoutState extends State<MainLayout> {
       actions: _index == 0
           ? [
               IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () => Navigator.pushNamed(context, '/search'),
+              ),
+              IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
                 onPressed: () => Navigator.pushNamed(context, '/cart'),
               ),
