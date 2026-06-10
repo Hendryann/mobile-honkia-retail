@@ -44,7 +44,7 @@ if (dev) {
 		[ "1", "Radio Telescope", "tool", "A type of telescope to detect radio signals from outer space", 100, 100 ],
 		[ "2", "Otherworldly Crystal", "material", "A mysterious material from the outer galaxy. ", 1, 1000000 ],
 		[ "4", "Lifeform Analyzer", "tool", "A tool to detect life outside within a planet" , 20 , 2000  ],
-		[ "5", "Planet Analyzer", "tool", "A tool to analyze a planet's atmosphere & surface compositions", 10],
+		[ "5", "Planet Analyzer", "tool", "A tool to analyze a planet's atmosphere & surface compositions", 10, 9],
 		[ "6", "Neutronium", "material", "Don't worry about it" , 1, 5000000],
 	]
 	db.query(`insert into items(id, name, type, description, stock, price) values ` + map(items), items.flat()).catch(console.error)
