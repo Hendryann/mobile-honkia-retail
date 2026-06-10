@@ -74,48 +74,22 @@ class _ProfilePageState extends State<ProfilePage> {
             color: cardColor,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            children: [
-              ListTile(
-                leading: Icon(Icons.person_outline, color: primary),
-                title: Text(
-                  'Customize Profile',
-                  style: TextStyle(color: onSurface),
-                ),
-                trailing: Icon(
-                  Icons.chevron_right,
-                  color: onSurface.withAlpha(128),
-                ),
-                onTap: () {},
+          child: ListenableBuilder(
+            listenable: themeNotifier,
+            builder: (context, _) => ListTile(
+              leading: Icon(Icons.palette_outlined, color: primary),
+              title: Text('Appearance', style: TextStyle(color: onSurface)),
+              subtitle: Text(
+                themeNotifier.currentName == 'dark'
+                    ? 'Dark mode'
+                    : 'Light mode',
+                style: TextStyle(color: onSurface.withAlpha(128), fontSize: 12),
               ),
-              Divider(
-                height: 1,
-                indent: 16,
-                endIndent: 16,
-                color: onSurface.withAlpha(20),
+              trailing: Switch(
+                value: themeNotifier.currentName == 'dark',
+                onChanged: (v) => themeNotifier.setTheme(v ? 'dark' : 'light'),
               ),
-              ListenableBuilder(
-                listenable: themeNotifier,
-                builder: (context, _) => ListTile(
-                  leading: Icon(Icons.palette_outlined, color: primary),
-                  title: Text('Appearance', style: TextStyle(color: onSurface)),
-                  subtitle: Text(
-                    themeNotifier.currentName == 'dark'
-                        ? 'Dark mode'
-                        : 'Light mode',
-                    style: TextStyle(
-                      color: onSurface.withAlpha(128),
-                      fontSize: 12,
-                    ),
-                  ),
-                  trailing: Switch(
-                    value: themeNotifier.currentName == 'dark',
-                    onChanged: (v) =>
-                        themeNotifier.setTheme(v ? 'dark' : 'light'),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
