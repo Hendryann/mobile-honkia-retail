@@ -1,6 +1,7 @@
 {
 	"scripts": {
-		"start": "bun src/index.ts"
+		"dev": "bun src/index.ts",
+		"start": "node dist"
 	},
 	"devDependencies": {
 		"@types/express": "^5.0.6",
