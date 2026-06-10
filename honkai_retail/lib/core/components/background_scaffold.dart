@@ -7,6 +7,7 @@ class BackgroundScaffold extends StatelessWidget {
     this.actions,
     this.currentIndex,
     this.onTabChanged,
+    this.navItems,
     this.showBottomNav = true,
   });
 
@@ -15,6 +16,7 @@ class BackgroundScaffold extends StatelessWidget {
   final int? currentIndex;
   final ValueChanged<int>? onTabChanged;
   final bool showBottomNav;
+  final List<BottomNavigationBarItem>? navItems;
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +27,18 @@ class BackgroundScaffold extends StatelessWidget {
           ? BottomNavigationBar(
               currentIndex: currentIndex ?? 0,
               onTap: onTabChanged,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'History',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
+              items:
+                  navItems ??
+                  const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.person),
+                      label: 'Profile',
+                    ),
+                  ],
             )
           : null,
     );
