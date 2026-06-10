@@ -12,6 +12,10 @@ server.app.get('/items',
 			v.push(req.params.category)
 		}
 		q += ' ORDER BY created_at DESC'
+    if (req.query.limit) {
+      q += ' LIMIT ?'
+      v.push(parseInt(req.query.limit as string))
+    }
 
     	const [items] = await db.execute(q, v) as any
 		res.json(items).end()
