@@ -111,10 +111,12 @@ class _ItemCardState extends State<ItemCard> {
                         ),
                       ),
                       Text(
-                        '${item['stock']} in stock',
-                        style: const TextStyle(
+                        item['stock'] > 0
+                            ? '${item['stock']} in stock'
+                            : 'OUT OF STOCK',
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Colors.orange,
+                          color: item['stock'] > 0 ? Colors.orange : Colors.red,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
