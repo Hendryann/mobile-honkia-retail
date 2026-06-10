@@ -21,6 +21,14 @@ class _ItemCardState extends State<ItemCard> {
     _imageFuture = _loadImage();
   }
 
+  @override
+  void didUpdateWidget(ItemCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.item['id'] != widget.item['id']) {
+      _imageFuture = _loadImage();
+    }
+  }
+
   Future<List<int>?> _loadImage() async {
     final res = await ApiService.get('/item/${widget.item['id']}/image');
     if (res.statusCode == 200 && res.bodyBytes.isNotEmpty) {
