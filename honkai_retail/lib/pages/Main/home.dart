@@ -192,8 +192,6 @@ class _WelcomeBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
