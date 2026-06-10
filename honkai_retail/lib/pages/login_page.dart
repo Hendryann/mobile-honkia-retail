@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -49,6 +50,44 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       setState(() => _error = 'Could not reach server');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _googleLogin() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final user = await GoogleSignIn.instance.authenticate();
+      final auth = user.authentication;
+      final idToken = auth.idToken;
+
+      if (idToken == null) {
+        setState(() => _error = 'Google sign-in failed');
+        return;
+      }
+
+      final res = await http.post(
+        Uri.parse('${dotenv.env['API_URL']}/google-login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'idToken': idToken}),
+      );
+
+      if (!mounted) return;
+
+      if (res.statusCode == 200) {
+        final token = jsonDecode(res.body)['token'];
+        await _storage.write(key: 'jwt', value: token);
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        setState(() => _error = 'Google sign-in failed');
+      }
+    } catch (e) {
+      setState(() => _error = e.toString());
     } finally {
       setState(() => _loading = false);
     }
@@ -238,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: _googleLogin,
                         icon: Image.network(
                           'https://www.google.com/favicon.ico',
                           width: 18,
