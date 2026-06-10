@@ -192,7 +192,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: ElevatedButton(
                     onPressed: inStock
                         ? () {
-                            cartNotifier.add(item, quantity: _quantity);
+                            cartNotifier.add(
+                              item['id'] as String,
+                              quantity: _quantity,
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Added to Cart')),
                             );

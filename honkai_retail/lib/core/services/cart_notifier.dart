@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartItem {
-  final Map<String, dynamic> item;
+  final String itemId;
   int quantity;
 
-  CartItem({required this.item, this.quantity = 1});
+  CartItem({required this.itemId, this.quantity = 1});
 
-  Map<String, dynamic> toJson() => {'item': item, 'quantity': quantity};
+  Map<String, dynamic> toJson() => {'itemId': itemId, 'quantity': quantity};
 
   factory CartItem.fromJson(Map<String, dynamic> json) =>
-      CartItem(item: json['item'], quantity: json['quantity']);
+      CartItem(itemId: json['itemId'], quantity: json['quantity']);
 }
 
 class CartNotifier extends ChangeNotifier {
@@ -20,8 +20,6 @@ class CartNotifier extends ChangeNotifier {
 
   List<CartItem> get items => _items;
   int get totalItems => _items.fold(0, (sum, i) => sum + i.quantity);
-  int get totalPrice =>
-      _items.fold(0, (sum, i) => sum + (i.item['price'] as int) * i.quantity);
 
   CartNotifier() {
     _load();
@@ -45,21 +43,19 @@ class CartNotifier extends ChangeNotifier {
     );
   }
 
-  void add(Map<String, dynamic> item, {int quantity = 1}) {
-    final existing = _items
-        .where((i) => i.item['id'] == item['id'])
-        .firstOrNull;
+  void add(String itemId, {int quantity = 1}) {
+    final existing = _items.where((i) => i.itemId == itemId).firstOrNull;
     if (existing != null) {
       existing.quantity += quantity;
     } else {
-      _items.add(CartItem(item: item, quantity: quantity));
+      _items.add(CartItem(itemId: itemId, quantity: quantity));
     }
     _save();
     notifyListeners();
   }
 
   void remove(String itemId) {
-    _items.removeWhere((i) => i.item['id'] == itemId);
+    _items.removeWhere((i) => i.itemId == itemId);
     _save();
     notifyListeners();
   }
@@ -69,7 +65,7 @@ class CartNotifier extends ChangeNotifier {
       remove(itemId);
       return;
     }
-    final existing = _items.where((i) => i.item['id'] == itemId).firstOrNull;
+    final existing = _items.where((i) => i.itemId == itemId).firstOrNull;
     if (existing != null) {
       existing.quantity = quantity;
       _save();
@@ -83,3 +79,4 @@ class CartNotifier extends ChangeNotifier {
     notifyListeners();
   }
 }
+
