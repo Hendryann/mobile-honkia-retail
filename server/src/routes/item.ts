@@ -13,7 +13,7 @@ server.app.get('/items',
 		}
 		q += ' ORDER BY created_at DESC'
     if (req.query.limit) {
-  q += ` LIMIT ${parseInt(req.query.limit as string)}`
+      q += ` LIMIT ${parseInt(req.query.limit as string)}`
     }
 
     	const [items] = await db.execute(q, v) as any
@@ -102,7 +102,7 @@ server.app.patch('/item/:id',
 server.app.delete('/item/:id',
 	server.needAdmin,
 	server.promisifyHandler(async (req, res) => {
-		await db.execute('delete from items where id = ?', req.params.id)
+		await db.execute('delete from items where id = ?', [req.params.id])
 		res.end()
 	})
 )
