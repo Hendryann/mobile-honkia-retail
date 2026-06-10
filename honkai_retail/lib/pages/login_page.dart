@@ -146,13 +146,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Email Address', style: TextStyle(color: onSurface)),
+                    Text('Username', style: TextStyle(color: onSurface)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _usernameController,
                       decoration: InputDecoration(
-                        hintText: 'name@example.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        hintText: 'Enter your username',
+                        prefixIcon: const Icon(Icons.person_outline),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
