@@ -5,7 +5,15 @@ import crypto from 'crypto'
 
 server.app.get('/items',
 	server.promisifyHandler(async (req, res) => {
-    const [items] = await db.execute('select * from items ORDER BY created_at DESC') as any
+		let q = 'select * from items'
+		let v: any[] = []
+		if (req.params.category) {
+			q += ' where type = ?'
+			v.push(req.params.category)
+		}
+		q += ' ORDER BY created_at DESC'
+
+    	const [items] = await db.execute(q, v) as any
 		res.json(items).end()
 	})
 )
