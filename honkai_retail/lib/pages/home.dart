@@ -13,13 +13,25 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Map<String, dynamic>? _userInfo;
-  List<Map<String, dynamic>> _items = [];
   bool _loading = true;
-
+  List<Map<String, dynamic>> _allItems = [];
+  List<Map<String, dynamic>> _items = [];
+  List<String> get _types =>
+      _allItems.map((i) => i['type'] as String).toSet().toList();
+  String? _selectedType;
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  void _applyFilter() {
+    setState(() {
+      final filtered = _selectedType == null
+          ? _allItems
+          : _allItems.where((i) => i['type'] == _selectedType).toList();
+      _items = filtered.take(4).toList();
+    });
   }
 
   Future<void> _load() async {
@@ -33,9 +45,9 @@ class _HomeState extends State<Home> {
         _userInfo = jsonDecode(results[0].body);
       }
       if (results[1].statusCode == 200) {
-        _items = List<Map<String, dynamic>>.from(
+        _allItems = List<Map<String, dynamic>>.from(
           jsonDecode(results[1].body),
-        ).take(6).toList();
+        );
         if (!mounted) return;
       }
       _loading = false;
@@ -80,7 +92,58 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           TextButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => SafeArea(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Text(
+                                          'Filter by Type',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        title: const Text('All'),
+                                        leading: Radio<String?>(
+                                          value: null,
+                                          groupValue: _selectedType,
+                                          onChanged: (v) {
+                                            setState(() => _selectedType = v);
+                                            _applyFilter();
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                      ),
+                                      ..._types.map(
+                                        (type) => ListTile(
+                                          title: Text(
+                                            type[0].toUpperCase() +
+                                                type.substring(1),
+                                          ),
+                                          leading: Radio<String?>(
+                                            value: type,
+                                            groupValue: _selectedType,
+                                            onChanged: (v) {
+                                              setState(() => _selectedType = v);
+                                              _applyFilter();
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                             icon: const Icon(Icons.filter_list, size: 16),
                             label: const Text('Filter'),
                           ),
@@ -166,3 +229,4 @@ class _WelcomeBanner extends StatelessWidget {
     );
   }
 }
+
