@@ -13,14 +13,18 @@ server.app.get('/items',
 		}
 		q += ' ORDER BY created_at DESC'
     if (req.query.limit) {
-      q += ' LIMIT ?'
-      v.push(parseInt(req.query.limit as string))
+  q += ` LIMIT ${parseInt(req.query.limit as string)}`
     }
 
     	const [items] = await db.execute(q, v) as any
 		res.json(items).end()
 	})
 )
+
+server.app.get('/item/types', server.promisifyHandler(async (_, res) => {
+  const [types] = await db.execute('select distinct type from items') as any
+  res.json(types.map((t: any) => t.type)).end()
+}))
 
 server.app.get('/item/:id',
 	server.promisifyHandler(async (req, res) => {
@@ -102,3 +106,5 @@ server.app.delete('/item/:id',
 		res.end()
 	})
 )
+
+
