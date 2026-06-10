@@ -51,7 +51,7 @@ if (dev) {
 
 	const users = [
 		[ "admin", true, process.env.admin_password ? hashPassword('admin', process.env.admin_password) : null ],
-		[ "user" , false, 'user' ],
+		[ "user" , false, hashPassword('user', 'user') ],
 	]
 	db.query(`insert into users(name, isadmin, password) values` + map(users), users.flat()).catch(console.error)
 }
