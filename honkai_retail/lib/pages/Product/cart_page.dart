@@ -264,11 +264,19 @@ class _CartPageState extends State<CartPage> {
                                                 Icons.add,
                                                 size: 16,
                                               ),
-                                              onPressed: () =>
+                                              onPressed: () {
+                                                final stock =
+                                                    _itemCache[cartItem
+                                                            .itemId]?['stock']
+                                                        as int? ??
+                                                    0;
+                                                if (cartItem.quantity < stock) {
                                                   cartNotifier.updateQuantity(
                                                     cartItem.itemId,
                                                     cartItem.quantity + 1,
-                                                  ),
+                                                  );
+                                                }
+                                              },
                                               padding: EdgeInsets.zero,
                                               constraints:
                                                   const BoxConstraints(),
