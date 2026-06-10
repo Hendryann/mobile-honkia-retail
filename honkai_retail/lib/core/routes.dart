@@ -6,11 +6,13 @@ import 'package:honkai_retail/pages/Product/cart_page.dart';
 import 'package:honkai_retail/pages/Product/product_detail_page.dart';
 import 'package:honkai_retail/pages/Product/search_page.dart';
 import 'package:honkai_retail/pages/login_page.dart';
+import 'package:honkai_retail/pages/register_page.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> get routes => {
     '/': (context) => const AuthGate(),
     '/login': (context) => const LoginPage(),
+    '/register': (context) => const RegisterPage(),
     '/home': (context) => const MainLayout(),
     '/profile': (context) => const ProfilePage(),
     '/product': (context) {

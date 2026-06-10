@@ -1,45 +1,66 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:honkai_retail/core/services/api_service.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _storage = const FlutterSecureStorage();
   bool _obscurePassword = true;
+  bool _obscureConfirm = true;
   bool _loading = false;
   String? _error;
 
-  Future<void> _login() async {
+  Future<void> _register() async {
+    if (_usernameController.text.isEmpty) {
+      setState(() => _error = 'Username cannot be empty');
+      return;
+    }
+    if (_usernameController.text.length > 20) {
+      setState(() => _error = 'Username cannot be longer than 20 characters');
+      return;
+    }
+    if (_passwordController.text.length < 6) {
+      setState(() => _error = 'Password must be at least 6 characters');
+      return;
+    }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() => _error = 'Passwords do not match');
+      return;
+    }
+
     setState(() {
       _loading = true;
       _error = null;
     });
+
     try {
       final res = await ApiService.post(
-        '/login',
+        '/register',
         body: {
           'username': _usernameController.text,
           'password': _passwordController.text,
         },
       );
+
       if (!mounted) return;
+
       if (res.statusCode == 200) {
         final token = jsonDecode(res.body)['token'];
         await _storage.write(key: 'jwt', value: token);
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');
-      } else if (res.statusCode == 401) {
-        setState(() => _error = 'Invalid username or password');
+      } else if (res.statusCode == 400) {
+        setState(() => _error = res.body.trim());
       } else {
         setState(() => _error = 'Something went wrong');
       }
@@ -50,43 +71,11 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _googleLogin() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final user = await GoogleSignIn.instance.authenticate();
-      final auth = user.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null) {
-        setState(() => _error = 'Google sign-in failed');
-        return;
-      }
-      final res = await ApiService.post(
-        '/google-login',
-        body: {'idToken': idToken},
-      );
-      if (!mounted) return;
-      if (res.statusCode == 200) {
-        final token = jsonDecode(res.body)['token'];
-        await _storage.write(key: 'jwt', value: token);
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        setState(() => _error = 'Google sign-in failed');
-      }
-    } catch (e) {
-      setState(() => _error = e.toString());
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
-
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -126,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Welcome back to effortless shopping',
+                'Create your account',
                 style: TextStyle(color: onSurface.withAlpha(153)),
               ),
               const SizedBox(height: 32),
@@ -146,13 +135,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Email Address', style: TextStyle(color: onSurface)),
+                    Text('Username', style: TextStyle(color: onSurface)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _usernameController,
                       decoration: InputDecoration(
-                        hintText: 'name@example.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        hintText: 'Enter a username',
+                        prefixIcon: const Icon(Icons.person_outline),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
@@ -167,16 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Password', style: TextStyle(color: onSurface)),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text('Forgot?'),
-                        ),
-                      ],
-                    ),
+                    Text('Password', style: TextStyle(color: onSurface)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _passwordController,
@@ -206,6 +186,40 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Confirm Password',
+                      style: TextStyle(color: onSurface),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      obscureText: _obscureConfirm,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: onSurface.withAlpha(51),
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: primary, width: 1.5),
+                        ),
+                      ),
+                    ),
                     if (_error != null) ...[
                       const SizedBox(height: 12),
                       Text(
@@ -217,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _loading ? null : _login,
+                        onPressed: _loading ? null : _register,
                         icon: _loading
                             ? const SizedBox(
                                 width: 16,
@@ -228,44 +242,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               )
                             : const Icon(Icons.arrow_forward),
-                        label: const Text('Sign In'),
+                        label: const Text('Create Account'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            'or continue with',
-                            style: TextStyle(color: onSurface.withAlpha(128)),
-                          ),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _googleLogin,
-                        icon: Image.network(
-                          'https://www.google.com/favicon.ico',
-                          width: 18,
-                          height: 18,
-                        ),
-                        label: const Text('Google'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -280,13 +261,14 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    'Already have an account? ',
                     style: TextStyle(color: onSurface),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/register'),
+                    onTap: () =>
+                        Navigator.pushReplacementNamed(context, '/login'),
                     child: Text(
-                      'Sign Up',
+                      'Sign In',
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.bold,
