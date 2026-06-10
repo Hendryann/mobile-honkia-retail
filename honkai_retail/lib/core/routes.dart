@@ -3,6 +3,7 @@ import 'package:honkai_retail/core/auth_gate.dart';
 import 'package:honkai_retail/pages/Main/main_layout.dart';
 import 'package:honkai_retail/pages/Main/profile_page.dart';
 import 'package:honkai_retail/pages/Product/cart_page.dart';
+import 'package:honkai_retail/pages/Product/item_form_page.dart';
 import 'package:honkai_retail/pages/Product/product_detail_page.dart';
 import 'package:honkai_retail/pages/Product/search_page.dart';
 import 'package:honkai_retail/pages/login_page.dart';
@@ -22,5 +23,11 @@ class AppRoutes {
     },
     '/cart': (context) => const CartPage(),
     '/search': (context) => const SearchPage(),
+    '/item/new': (context) => const ItemFormPage(),
+    '/item/edit': (context) {
+      final item =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      return ItemFormPage(item: item);
+    },
   };
 }

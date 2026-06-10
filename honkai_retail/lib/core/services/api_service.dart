@@ -40,6 +40,19 @@ class ApiService {
     );
   }
 
+  static Future<http.Response> put(
+    String path, {
+    Object? body,
+    bool auth = false,
+    String contentType = 'application/octet-stream',
+  }) async {
+    return http.put(
+      Uri.parse('$_base$path'),
+      headers: await _headers(auth: auth, contentType: contentType),
+      body: body,
+    );
+  }
+
   static Future<http.Response> patch(
     String path, {
     Object? body,
