@@ -1,3 +1,45 @@
+# Backend
 node_modules
 .env
 dist
+
+# Miscellaneous
+honkai_retail/**/*.class
+honkai_retail/**/*.log
+honkai_retail/**/*.pyc
+honkai_retail/**/*.swp
+honkai_retail/**/.DS_Store
+honkai_retail/.atom/
+honkai_retail/.build/
+honkai_retail/.buildlog/
+honkai_retail/.history
+honkai_retail/.svn/
+honkai_retail/.swiftpm/
+honkai_retail/migrate_working_dir/
+
+# IntelliJ related
+honkai_retail/**/*.iml
+honkai_retail/**/*.ipr
+honkai_retail/**/*.iws
+honkai_retail/.idea/
+
+# Flutter/Dart/Pub related
+honkai_retail/**/doc/api/
+honkai_retail/**/ios/Flutter/.last_build_id
+honkai_retail/.dart_tool/
+honkai_retail/.flutter-plugins
+honkai_retail/.flutter-plugins-dependencies
+honkai_retail/.pub-cache/
+honkai_retail/.pub/
+honkai_retail/build/
+
+# Symbolication related
+honkai_retail/app.*.symbols
+
+# Obfuscation related
+honkai_retail/app.*.map.json
+
+# Android Studio will place build artifacts here
+honkai_retail/android/app/debug
+honkai_retail/android/app/profile
+honkai_retail/android/app/release
