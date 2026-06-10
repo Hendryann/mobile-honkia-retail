@@ -7,9 +7,9 @@ server.app.get('/items',
 	server.promisifyHandler(async (req, res) => {
 		let q = 'select * from items'
 		let v: any[] = []
-		if (req.params.category) {
+		if (req.query.category) {
 			q += ' where type = ?'
-			v.push(req.params.category)
+			v.push(req.query.category)
 		}
 		q += ' ORDER BY created_at DESC'
     if (req.query.limit) {
