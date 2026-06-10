@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:honkai_retail/core/components/background_scaffold.dart';
 import 'package:honkai_retail/core/services/api_service.dart';
-import 'package:honkai_retail/core/services/cart_notifier.dart';
 import 'package:honkai_retail/main.dart';
 
 class CartPage extends StatefulWidget {
@@ -37,7 +36,6 @@ class _CartPageState extends State<CartPage> {
       }
     }
 
-    // Load images
     final imageResults = await Future.wait(
       ids.map((id) => ApiService.get('/item/$id/image')),
     );
@@ -62,6 +60,45 @@ class _CartPageState extends State<CartPage> {
     if (item == null) return sum;
     return sum + (item['price'] as int) * cartItem.quantity;
   });
+
+  Future<void> _checkout() async {
+    for (final cartItem in cartNotifier.items) {
+      final item = _itemCache[cartItem.itemId];
+      if (item == null) continue;
+      if ((item['stock'] as int) < cartItem.quantity) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${item['name']} does not have enough stock')),
+        );
+        return;
+      }
+    }
+
+    final results = await Future.wait(
+      cartNotifier.items.map(
+        (cartItem) => ApiService.post(
+          '/item/${cartItem.itemId}/purchase',
+          body: {'amount': cartItem.quantity},
+          auth: true,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    final failed = results.where((r) => r.statusCode != 200).toList();
+    if (failed.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Checkout failed, please try again')),
+      );
+      return;
+    }
+
+    cartNotifier.clear();
+    Navigator.pop(context);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Order placed successfully!')));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,137 +152,151 @@ class _CartPageState extends State<CartPage> {
 
                           if (item == null) return const SizedBox();
 
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: cardColor,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(13),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                // Image
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Container(
-                                    width: 72,
-                                    height: 72,
-                                    color: onSurface.withAlpha(13),
-                                    child: image != null
-                                        ? Image.memory(image, fit: BoxFit.cover)
-                                        : Icon(
-                                            Icons.image_not_supported,
-                                            color: onSurface.withAlpha(77),
-                                          ),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/product',
+                                arguments: _itemCache[cartItem.itemId],
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: cardColor,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(13),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                // Info
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item['name'],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: onSurface,
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      width: 72,
+                                      height: 72,
+                                      color: onSurface.withAlpha(13),
+                                      child: image != null
+                                          ? Image.memory(
+                                              image,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Icon(
+                                              Icons.image_not_supported,
+                                              color: onSurface.withAlpha(77),
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item['name'],
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: onSurface,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '\$${item['price']}',
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: onSurface.withAlpha(51),
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.remove,
+                                                size: 16,
+                                              ),
+                                              onPressed: () =>
+                                                  cartNotifier.updateQuantity(
+                                                    cartItem.itemId,
+                                                    cartItem.quantity - 1,
+                                                  ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              iconSize: 16,
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
+                                              child: Text(
+                                                '${cartItem.quantity}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: onSurface,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.add,
+                                                size: 16,
+                                              ),
+                                              onPressed: () =>
+                                                  cartNotifier.updateQuantity(
+                                                    cartItem.itemId,
+                                                    cartItem.quantity + 1,
+                                                  ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              iconSize: 16,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        '\$${item['price']}',
-                                        style: TextStyle(
-                                          color: primary,
-                                          fontWeight: FontWeight.bold,
+                                      GestureDetector(
+                                        onTap: () => cartNotifier.remove(
+                                          cartItem.itemId,
+                                        ),
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
+                                          size: 20,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                // Quantity + remove
-                                Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: onSurface.withAlpha(51),
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.remove,
-                                              size: 16,
-                                            ),
-                                            onPressed: () =>
-                                                cartNotifier.updateQuantity(
-                                                  cartItem.itemId,
-                                                  cartItem.quantity - 1,
-                                                ),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            iconSize: 16,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                            ),
-                                            child: Text(
-                                              '${cartItem.quantity}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: onSurface,
-                                              ),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.add,
-                                              size: 16,
-                                            ),
-                                            onPressed: () =>
-                                                cartNotifier.updateQuantity(
-                                                  cartItem.itemId,
-                                                  cartItem.quantity + 1,
-                                                ),
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            iconSize: 16,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    GestureDetector(
-                                      onTap: () =>
-                                          cartNotifier.remove(cartItem.itemId),
-                                      child: const Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },
                       ),
                     ),
-                    // Checkout bar
                     Container(
                       padding: const EdgeInsets.only(
                         left: 16,
@@ -288,7 +339,7 @@ class _CartPageState extends State<CartPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: _checkout,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primary,
                                 foregroundColor: Colors.white,
