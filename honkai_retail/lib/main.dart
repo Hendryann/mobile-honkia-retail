@@ -12,7 +12,9 @@ void main() async {
   themeNotifier = ThemeNotifier();
   cartNotifier = CartNotifier();
   await dotenv.load(fileName: '.env');
-  await GoogleSignIn.instance.initialize();
+  await GoogleSignIn.instance.initialize(
+    serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],
+  );
   runApp(const MyApp());
 }
 
@@ -33,4 +35,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
