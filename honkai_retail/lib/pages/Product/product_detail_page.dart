@@ -42,11 +42,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final cardColor = Theme.of(context).cardColor;
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primary = Theme.of(context).colorScheme.primary;
-    final cartItem = cartNotifier.items
-        .where((i) => i.itemId == item['id'])
-        .firstOrNull;
-    final alreadyInCart = cartItem?.quantity ?? 0;
-    final remainingStock = stock - alreadyInCart;
 
     return BackgroundScaffold(
       showBottomNav: false,
