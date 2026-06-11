@@ -44,3 +44,5 @@ honkai_retail/app.*.map.json
 honkai_retail/android/app/debug
 honkai_retail/android/app/profile
 honkai_retail/android/app/release
+
+out.zip
