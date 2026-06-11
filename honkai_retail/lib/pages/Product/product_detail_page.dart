@@ -138,88 +138,103 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.only(
-              left: 16,
-              top: 12,
-              right: 16,
-              bottom: 32,
-            ),
-            decoration: BoxDecoration(
-              color: cardColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
+          ListenableBuilder(
+            listenable: cartNotifier,
+            builder: (context, _) {
+              final cartItem = cartNotifier.items
+                  .where((i) => i.itemId == item['id'])
+                  .firstOrNull;
+              final alreadyInCart = cartItem?.quantity ?? 0;
+              final remainingStock = stock - alreadyInCart;
+
+              return Container(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  top: 12,
+                  right: 16,
+                  bottom: 32,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: onSurface.withAlpha(51)),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove, size: 18),
-                        onPressed: _quantity > 1
-                            ? () => setState(() => _quantity--)
-                            : null,
-                      ),
-                      Text(
-                        '$_quantity',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: onSurface,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add, size: 18),
-                        onPressed: _quantity < stock
-                            ? () => setState(() => _quantity++)
-                            : null,
-                      ),
-                    ],
-                  ),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(15),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: inStock
-                        ? () {
-                            cartNotifier.add(
-                              item['id'] as String,
-                              quantity: _quantity,
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Added to Cart')),
-                            );
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: onSurface.withAlpha(51)),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                    child: const Text(
-                      'Add to Cart',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove, size: 18),
+                            onPressed: _quantity > 1
+                                ? () => setState(() => _quantity--)
+                                : null,
+                          ),
+                          Text(
+                            '$_quantity',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: onSurface,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: _quantity < remainingStock
+                                ? () => setState(() => _quantity++)
+                                : null,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: remainingStock > 0
+                            ? () {
+                                cartNotifier.add(
+                                  item['id'] as String,
+                                  quantity: _quantity,
+                                );
+                                ScaffoldMessenger.of(context)
+                                  ..clearSnackBars()
+                                  ..showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Added to Cart'),
+                                    ),
+                                  );
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          remainingStock <= 0 ? 'Max Added' : 'Add to Cart',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),

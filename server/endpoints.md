@@ -1,14 +1,38 @@
+### POST `/login`
+Requires JSON body, max payload 3KB
+```js
+username: string
+password: string
+```
+Return: `{ token: string }`
+
+### POST `/register`
+Requires JSON body, max payload 3KB
+```js
+username: string
+password: string
+```
+Return: `{ token: string }`
+
+### POST `/google-login`
+Requires JSON body, max payload 3KB
+```js
+idToken: string
+```
+Return: `{ token: string }`
+
 ### GET `/userinfo`
 Requires user authorization\
 Return: [`User`](#user)
 
-### GET `/login`
-
-### GET `/register`
-
 ### GET `/items`
 Gets list of items\
+Supports query params: `?limit=number`, `?category=string`\
 Return: [`Item`](#item)`[]`
+
+### GET `/item/types`
+Gets list of distinct item types\
+Return: `string[]`
 
 ### GET `/item/:id`
 Gets item information\
@@ -18,18 +42,18 @@ Return: [`Item`](#item)
 Gets item image\
 Return: `Blob | null`
 
-### GET `/item/:id/purchase`
+### POST `/item/:id/purchase`
 Makes a purchase, decreases stock\
 Requires user authorization\
 Requires JSON body, max payload 3KB\
 ```js
-stock?: u64 = 1
+amount?: u64 = 1
 ```
 
 ### POST `/item/new`
 Creates a new item\
 Requires admin authorization\
-Requires JSON body [`ItemInfo`](#iteminfo), max payload 3KB \
+Requires JSON body [`ItemInfo`](#iteminfo), max payload 3KB\
 Return:
 ```js
 id: string(12)
@@ -38,7 +62,7 @@ id: string(12)
 ### PUT `/item/:id/image`
 Modifies item image\
 Requires admin authorization\
-Acceps binary body (image), max payload 5MB
+Accepts binary body (image), max payload 5MB
 
 ### PATCH `/item/:id`
 Modifies item information\
@@ -50,7 +74,6 @@ Deletes item\
 Requires admin authorization
 
 ## Interfaces
-
 ### `ItemInfo`
 ```js
 name: string(100)
@@ -68,8 +91,6 @@ id: string(12)
 
 ### `User`
 ```js
-id: string(12)
 name: string(100)
 isadmin: 1/0
 ```
-

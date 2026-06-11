@@ -184,7 +184,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image picker
             GestureDetector(
               onTap: _showImageSourceSheet,
               child: Container(
